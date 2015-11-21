@@ -37,12 +37,13 @@ class Excel extends Component
     /**
      * @var array map of format => extension
      */
-    protected static $map = array(
+    protected static $map = [
+        'OpenDocument' => 'ods',
         'CSV' => 'csv',
         'HTML' => 'html',
         'Excel5' => 'xls',
         'Excel2007' => 'xlsx',
-    );
+    ];
 
     /**
      * New instance
@@ -146,32 +147,19 @@ class Excel extends Component
         }
         $fileName .= '.'.static::$map[$format];
 
-        $this->downloadHeaders($fileName);
-
-        $writer = PHPExcel_IOFactory::createWriter($phpExcel, $format);
-        $writer->save('php://output');
-
-        Yii::$app->end();
-    }
-
-    /**
-     * HTTP headers for downloading
-     * @param string $fileName file name
-     */
-    protected function downloadHeaders($fileName)
-    {
-        if(!empty($fileName)) {
-            header('Content-Type: '.FileHelper::getMimeTypeByExtension($fileName));
-            header('Content-Disposition: attachment;filename="'.$fileName.'"');
-        }
-
+        header('Content-Type: '.FileHelper::getMimeTypeByExtension($fileName));
+        header('Content-Disposition: attachment;filename="'.$fileName.'"');
         header('Cache-Control: max-age=0');
         header('Cache-Control: max-age=1'); // If you're serving to IE 9, then the following may be needed
-
         // If you're serving to IE over SSL, then the following may be needed
         header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
         header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
         header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
         header ('Pragma: public'); // HTTP/1.0
+
+        $writer = PHPExcel_IOFactory::createWriter($phpExcel, $format);
+        $writer->save('php://output');
+
+        Yii::$app->end();
     }
 }
